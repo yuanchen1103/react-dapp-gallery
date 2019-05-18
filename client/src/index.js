@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import App from "./App";
 // import drizzle functions and contract artifact
 import { Drizzle, generateStore } from "drizzle";

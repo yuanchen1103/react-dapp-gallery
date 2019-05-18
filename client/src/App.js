@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import ExploreContainer from './components/ExploreContainer';
+import './styles/index.scss';
 class App extends Component {
   state = { loading: true, drizzleState: null };
   componentDidMount() {
@@ -12,7 +12,6 @@ class App extends Component {
       // check to see if it's ready, if so, update local component state
       if (drizzleState.drizzleStatus.initialized) {
         this.setState({ loading: false, drizzleState });
-        console.log(drizzle.contracts.Arts.methods.getArts());
       }
     });
   }
@@ -21,7 +20,9 @@ class App extends Component {
   }
   render() {
     if (this.state.loading) return 'Loading Drizzle...';
-    return <div className="App">Drizzle is ready</div>;
+    return <div className="App">
+      <ExploreContainer drizzle={this.props.drizzle} drizzleState={this.state.drizzleState}/>
+    </div>;
   }
 }
 export default App;

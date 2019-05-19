@@ -7,8 +7,8 @@ import "./People.sol";
 
 contract Arts {
     
-    Art[] arts;
-    People[] people;
+    uint[] arts;
+    uint[] people;
 
     mapping(uint => Art) artInfo;
     mapping(uint => Transaction) transactionInfo;
@@ -17,13 +17,17 @@ contract Arts {
 
     mapping(uint => People) peopleInfo;
 
-    constructor(Art[] memory _array, People[] memory _p) public payable {
+    mapping(address => uint) artMap;
+    
+    mapping(uint => address) artRevMap;
+
+    constructor(uint[] memory _array, uint[] memory _p) public payable {
 		  arts = _array;
 		  people = _p;
     }
 
-    function getArts() public view returns(Art[] memory) {
-        Art[] memory temp = new Art[](arts.length);
+    function getArts() public view returns(uint[] memory) {
+        uint[] memory temp = new uint[](arts.length);
         for (uint i = 0; i < arts.length; i++) {
             temp[i] = arts[i];
         }
@@ -33,14 +37,15 @@ contract Arts {
         return (artInfo[_artId].artId(), artInfo[_artId].artName(), peopleInfo[artInfo[_artId].owner()].name(), artInfo[_artId].getHistory());
     }
     function addPeople(uint _id, string memory _name) public payable {
-        People p = (new People)(_id, _name);
-        people.push(p);
+        People p = new People(_id, _name);
+        people.push(_id);
         peopleInfo[_id] = p;
     }
     function addArt(uint _artId, string memory name, uint owner) public payable {
-        Art a = (new Art)(_artId, name, owner);
-        arts.push(a);
+        Art a = new Art(_artId, name, owner);
+        arts.push(_artId);
         artInfo[_artId] = a;
+        artRevMap[_artId] = address(a);
     }
 
     function Time_call() public view returns (uint256){
@@ -58,7 +63,7 @@ contract Arts {
           }
         }
         peopleInfo[newOwner].pushArt(art);
-        Transaction t = (new Transaction)(_transactionId, artInfo[art].artId(), artInfo[art].artName(), _price, Time_call(), oldOwner, newOwner);
+        Transaction t = new Transaction(_transactionId, artInfo[art].artId(), artInfo[art].artName(), _price, Time_call(), oldOwner, newOwner);
         artInfo[art].addHistory(t);
         artInfo[art].changeOwner(newOwner);
         transactionInfo[_transactionId] = t;

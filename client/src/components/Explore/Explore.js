@@ -63,7 +63,7 @@ const Explore = (props) => {
       </Button>
       <Row gutter={24}>
         {allArts.map((item, i) => (
-          <Col md={6} key={i}>
+          <Col md={6} key={i} style={{marginBottom: 20}}>
             <Card
               onClick={() => handleOpenArtInfo()}
               hoverable

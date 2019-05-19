@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ExploreContainer from './components/ExploreContainer';
+import ExploreContainer from './components/Explore/ExploreContainer';
 import './styles/index.scss';
 class App extends Component {
   state = { loading: true, drizzleState: null };
@@ -20,9 +20,17 @@ class App extends Component {
   }
   render() {
     if (this.state.loading) return 'Loading Drizzle...';
-    return <div className="App">
-      <ExploreContainer drizzle={this.props.drizzle} drizzleState={this.state.drizzleState}/>
-    </div>;
+    return (
+      <div className="App">
+        <div className="main-wrapper">
+          <div className="header">DAPP GALLERY</div>
+          <ExploreContainer
+            drizzle={this.props.drizzle}
+            drizzleState={this.state.drizzleState}
+          />
+        </div>
+      </div>
+    );
   }
 }
 export default App;

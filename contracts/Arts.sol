@@ -1,75 +1,61 @@
 pragma solidity ^0.5.0;
-// pragma experimental ABIEncoderV2;
-
-import "./Transaction.sol";
-// import "./Art.sol";
-import "./People.sol";
+pragma experimental ABIEncoderV2;
 
 contract Arts {
     
-    uint[] arts;
-    uint[] people;
+    string[] arts;
 
     struct Art {
-        uint artId;
+        string artId;
         string artName;
-        uint owner;
+        string owner;
+        string history;
+    }
+    struct Transaction {
+        string transactionId;
+        string artId;
+        uint price;
+        uint256 date;
+        string old_owner;
+        string new_owner;
     }
 
-    mapping(uint => Art) artInfo;
-    mapping(uint => Transaction[]) transactionInfo;
+    mapping(string => Art) artInfo;
+    mapping(string => Transaction) transactionInfo;
 
-    mapping(uint => uint) artOwner;
-
-    mapping(uint => People) peopleInfo;
-
-    constructor(uint[] memory _array, uint[] memory _p) public payable {
-        arts = _array;
-        people = _p;
+    constructor() public payable {
+        arts = new string[](0);
     }
 
-    function getArts() public view returns(uint[] memory) {
-        uint[] memory temp = new uint[](arts.length);
+    function getArts() public view returns(string[] memory) {
+        string[] memory temp = new string[](arts.length);
         for (uint i = 0; i < arts.length; i++) {
             temp[i] = arts[i];
         }
         return temp;
+    }    
+    function getArtInfo(string memory _artId) public view returns(string memory, string memory, string memory, string memory) {
+        return (artInfo[_artId].artId, artInfo[_artId].artName, artInfo[_artId].owner, artInfo[_artId].history);
     }
-    // function getArtInfo(uint _artId) public view returns(uint, string memory, uint, Transaction[] memory) {
-        function getArtInfo(uint _artId) public view returns(uint, string memory, uint) {
-        // return (artInfo[_artId].artId, artInfo[_artId].artName, artInfo[_artId].owner, transactionInfo[_artId]);
-        return (artInfo[_artId].artId, artInfo[_artId].artName, artInfo[_artId].owner);
-    }
-    function addPeople(uint _id, string memory _name) public payable {
-        People p = new People(_id, _name);
-        people.push(_id);
-        peopleInfo[_id] = p;
-    }
-    function addArt(uint _artId, string memory name, uint owner) public payable {
-        Art memory a = Art(_artId, name, owner);
+    function addArt(string memory _artId, string memory name, string memory owner) public payable {
+        Art memory a = Art(_artId, name, owner, "");
         arts.push(_artId);
         artInfo[_artId] = a;
-        artOwner[_artId] = owner;
+    }
+    function getTransactionInfo(string memory _tId) public view returns(string memory, uint, uint256, string memory, string memory) {
+        return (transactionInfo[_tId].artId, transactionInfo[_tId].price, transactionInfo[_tId].date, transactionInfo[_tId].old_owner, transactionInfo[_tId].new_owner);
     }
 
     function Time_call() public view returns (uint256){
         return now;
     }
 
-    // function applyTransaction(uint _transactionId, uint oldOwner, uint newOwner, uint art, uint _price) public payable {
-    //     require(oldOwner != newOwner);
-    //     require(_price > 0);
-    //     require(artInfo[art].owner() == oldOwner);
+    function applyTransaction(string memory _transactionId, string memory newOwner, string memory art, uint _price) public payable {
+        require(_price > 0);
         
-    //     for(uint i = 0; i < peopleInfo[oldOwner].getArts().length; i++){
-    //       if(peopleInfo[oldOwner].getArts()[i] == artInfo[art].artId()) {
-    //         peopleInfo[oldOwner].deleteArt(i);
-    //       }
-    //     }
-    //     peopleInfo[newOwner].pushArt(art);
-    //     Transaction t = new Transaction(_transactionId, artInfo[art].artId(), artInfo[art].artName(), _price, Time_call(), oldOwner, newOwner);
-    //     artInfo[art].addHistory(t);
-    //     artInfo[art].changeOwner(newOwner);
-    //     transactionInfo[_transactionId] = t;
-    // }
+        Transaction memory t = Transaction(_transactionId, art, _price, Time_call(), artInfo[art].owner, newOwner);
+        artInfo[art].history = string(abi.encodePacked(artInfo[art].history,_transactionId,","));
+        artInfo[art].owner = newOwner;
+        transactionInfo[_transactionId] = t;
+    }
 }

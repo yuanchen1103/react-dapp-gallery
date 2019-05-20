@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import shortid from 'shortid';
+import shortid from 'shortid';
 import { Row, Col, Card, Button, Modal, Input, message } from 'antd';
 import styles from './Explore.module.scss';
 import ArtInfoModal from './ArtInfoModal';
@@ -21,6 +21,7 @@ const Explore = (props) => {
       .call()
       .then((res) => {
         changeAllArts(res);
+        console.log(res);
       })
       .catch((err) => {
         console.error(err);
@@ -33,17 +34,19 @@ const Explore = (props) => {
       return;
     }
     contract.methods
-      .addArt(12345, name, author)
+      .addArt(`art-${shortid.generate()}`, name, author)
       .send()
       .then(() => {
         message.success('Create Success!');
         getAllArts();
+        changeModalVisible(false);
+        changeName('');
+        changeAuthor('');
       })
       .catch((err) => {
         console.error(err);
         message.error('Something bad happened');
       });
-    changeModalVisible(false);
   };
   const handleOpenArtInfo = () => {
     changeArtInfoModalVisible(true);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import shortid from 'shortid';
+import moment from 'moment';
 import { Row, Col, Card, Button, Modal, Input, message } from 'antd';
 import styles from './Explore.module.scss';
 import ArtInfoModal from './ArtInfoModal';
@@ -15,6 +15,7 @@ const Explore = (props) => {
   const [allArts, changeAllArts] = useState([]);
   const [selectedArt, changeSelectedArt] = useState(null);
   const [selectedIndex, changeSelectedIndex] = useState(null);
+  const [confirmLoading, changeConfirmLoading] = useState(false);
   const contract = drizzle.contracts.Arts;
   const getAllArts = () => {
     contract.methods
@@ -54,8 +55,9 @@ const Explore = (props) => {
       message.error('Please fill in the name and the artist!');
       return;
     }
+    changeConfirmLoading(true);
     contract.methods
-      .addArt(Math.floor(Date.now() / 1000), name, author)
+      .addArt(moment().format('X'), name, author)
       .send()
       .then(() => {
         message.success('Create Success!');
@@ -63,10 +65,12 @@ const Explore = (props) => {
         changeModalVisible(false);
         changeName('');
         changeAuthor('');
+        changeConfirmLoading(false);
       })
       .catch((err) => {
         console.error(err);
         message.error('Something bad happened');
+        changeConfirmLoading(false);
       });
   };
   const handleOpenArtInfo = (i) => {
@@ -116,6 +120,7 @@ const Explore = (props) => {
         visible={modalVisible}
         onOk={handleConfirm}
         onCancel={() => changeModalVisible(false)}
+        confirmLoading={confirmLoading}
       >
         <Input
           placeholder="Give Artwork a Name"
@@ -136,6 +141,7 @@ const Explore = (props) => {
         changeSelectedArt={changeSelectedArt}
         selectedIndex={selectedIndex}
         changeSelectedIndex={changeSelectedIndex}
+        contract={contract}
       />
     </div>
   );

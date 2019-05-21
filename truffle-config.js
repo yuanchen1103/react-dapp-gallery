@@ -1,3 +1,6 @@
+var HDWalletProvider = require("truffle-hdwallet-provider");
+var MNEMONIC = 'fruit convince assault pride toy tiny body nose fruit trouble gorilla flip';
+
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -46,7 +49,14 @@ module.exports = {
       host: 'localhost',
       port: 8545,
       network_id: '*' // Match any network id
-    }
+    },
+    ropsten: {
+      provider: function() {
+        return new HDWalletProvider(MNEMONIC, "https://ropsten.infura.io/v3/32a9b5c6362743be96a46d975b822203")
+      },
+      network_id: 3,
+      gas: 4000000      //make sure this gas allocation isn't over 4M, which is the max
+    },
 
     // Another network with more advanced options...
     // advanced: {

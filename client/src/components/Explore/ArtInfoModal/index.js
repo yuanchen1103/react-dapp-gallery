@@ -20,7 +20,9 @@ const ArtInfoModal = (props) => {
     changeArtInfoModalVisible,
     selectedArt,
     selectedIndex,
-    contract
+    contract,
+    changeSelectedArt,
+    getAllArts
   } = props;
   const [loading, changeLoading] = useState(false);
   const [
@@ -41,41 +43,25 @@ const ArtInfoModal = (props) => {
       .applyTransaction(moment().format('X'), name, selectedArt[0], price)
       .send()
       .then(() => {
-        if (selectedArt) {
-          const getTransactionInfo = (id) => {
-            return new Promise((resolve, reject) => {
-              contract.methods
-                .getTransactionInfo(id)
-                .call()
-                .then((response) => {
-                  resolve(response);
-                })
-                .catch((err) => {
-                  reject(err);
-                });
-            });
-          };
-          const transactions = selectedArt[3];
-          const promises = transactions.map((id) => getTransactionInfo(id));
-          Promise.all(promises)
-            .then((res) => {
-              console.log(res);
-              changeTransactionInfo(res);
-              message.success('Create Success!');
-              changeAddTransactionModalVisible(false);
-              changeName('');
-              changePrice(0);
-              changeConfirmLoading(false);
-            })
-            .catch((err) => {
-              console.error(err);
-              changeConfirmLoading(false);
-              message.error('Something bad happened');
-            });
-        }
+        contract.methods
+          .getArtInfo(selectedArt[0])
+          .call()
+          .then((response) => {
+            changeSelectedArt(response);
+            getAllArts();
+            changeConfirmLoading(false);
+            changeName('');
+            changePrice(0);
+            changeAddTransactionModalVisible(false);
+          })
+          .catch((err) => {
+            console.error(err);
+            changeConfirmLoading(false);
+          });
       })
       .catch((err) => {
         console.error(err);
+        changeConfirmLoading(false);
         message.error('Something bad happened');
       });
   };
@@ -84,6 +70,7 @@ const ArtInfoModal = (props) => {
   };
   const getTransactions = () => {
     if (selectedArt) {
+      changeLoading(true);
       const getTransactionInfo = (id) => {
         return new Promise((resolve, reject) => {
           contract.methods
@@ -102,10 +89,12 @@ const ArtInfoModal = (props) => {
       Promise.all(promises)
         .then((res) => {
           changeTransactionInfo(res);
+          changeLoading(false);
         })
         .catch((err) => {
           console.error(err);
           message.error('Something bad happened');
+          changeLoading(false);
         });
     }
   };
@@ -172,11 +161,12 @@ const ArtInfoModal = (props) => {
                     title="Increase"
                     value={
                       transactionInfo && transactionInfo.length > 1
-                        ? ((transactionInfo[transactionInfo.length - 1][1] -
-                            transactionInfo[0][1]) /
-                            transactionInfo[0][1]) *
-                            100 +
-                          '%'
+                        ? (
+                            ((transactionInfo[transactionInfo.length - 1][1] -
+                              transactionInfo[0][1]) /
+                              transactionInfo[0][1]) *
+                            100
+                          ).toFixed(1) + '%'
                         : '--'
                     }
                   />
@@ -204,9 +194,23 @@ const ArtInfoModal = (props) => {
                 ? selectedArt[3].map((item, i) => (
                     <Timeline.Item key={i}>
                       {moment.unix(item).format('YYYY-MM-DD')}{' '}
-                      {transactionInfo && transactionInfo.length ? transactionInfo[i][3] : ''} to{' '}
-                      {transactionInfo && transactionInfo.length ? transactionInfo[i][4] : ''}, $
-                      {transactionInfo && transactionInfo.length ? transactionInfo[i][1] : ''}
+                      {transactionInfo &&
+                      transactionInfo.length &&
+                      transactionInfo[i]
+                        ? transactionInfo[i][3]
+                        : ''}{' '}
+                      to{' '}
+                      {transactionInfo &&
+                      transactionInfo.length &&
+                      transactionInfo[i]
+                        ? transactionInfo[i][4]
+                        : ''}
+                      , $
+                      {transactionInfo &&
+                      transactionInfo.length &&
+                      transactionInfo[i]
+                        ? transactionInfo[i][1]
+                        : ''}
                     </Timeline.Item>
                   ))
                 : null}

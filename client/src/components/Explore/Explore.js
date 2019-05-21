@@ -142,6 +142,7 @@ const Explore = (props) => {
         selectedIndex={selectedIndex}
         changeSelectedIndex={changeSelectedIndex}
         contract={contract}
+        getAllArts={getAllArts}
       />
     </div>
   );

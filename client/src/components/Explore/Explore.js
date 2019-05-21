@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import shortid from 'shortid';
+// import shortid from 'shortid';
 import { Row, Col, Card, Button, Modal, Input, message } from 'antd';
 import styles from './Explore.module.scss';
 import ArtInfoModal from './ArtInfoModal';
@@ -14,14 +14,35 @@ const Explore = (props) => {
   const [author, changeAuthor] = useState('');
   const [allArts, changeAllArts] = useState([]);
   const [selectedArt, changeSelectedArt] = useState(null);
+  const [selectedIndex, changeSelectedIndex] = useState(null);
   const contract = drizzle.contracts.Arts;
   const getAllArts = () => {
     contract.methods
       .getArts()
       .call()
       .then((res) => {
-        changeAllArts(res);
-        console.log(res);
+        const promise = (id) => {
+          return new Promise((resolve, reject) => {
+            contract.methods
+              .getArtInfo(id)
+              .call()
+              .then((response) => {
+                resolve(response);
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          });
+        };
+        const promises = res.map((id) => promise(id));
+        Promise.all(promises)
+          .then((data) => {
+            changeAllArts(data);
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Something bad happened');
+          });
       })
       .catch((err) => {
         console.error(err);
@@ -34,7 +55,7 @@ const Explore = (props) => {
       return;
     }
     contract.methods
-      .addArt(`art-${shortid.generate()}`, name, author)
+      .addArt(Math.floor(Date.now() / 1000), name, author)
       .send()
       .then(() => {
         message.success('Create Success!');
@@ -48,9 +69,11 @@ const Explore = (props) => {
         message.error('Something bad happened');
       });
   };
-  const handleOpenArtInfo = () => {
+  const handleOpenArtInfo = (i) => {
+    changeSelectedArt(allArts[i]);
+    changeSelectedIndex(i);
     changeArtInfoModalVisible(true);
-  }
+  };
   useEffect(() => {
     getAllArts();
   }, []);
@@ -66,24 +89,23 @@ const Explore = (props) => {
       </Button>
       <Row gutter={24}>
         {allArts.map((item, i) => (
-          <Col md={6} key={i} style={{marginBottom: 20}}>
+          <Col md={6} key={i} style={{ marginBottom: 20 }}>
             <Card
-              onClick={() => handleOpenArtInfo()}
+              onClick={() => handleOpenArtInfo(i)}
               hoverable
               bordered={false}
               cover={
                 <div
                   className={styles.cardImage}
                   style={{
-                    backgroundImage: `url("https://loremflickr.com/320/240/art?lock=${i +
-                      1}")`
+                    backgroundImage: `url("https://loremflickr.com/320/240/art?lock=${i}")`
                   }}
                 />
               }
             >
               <Meta
-                title="Europe Street beat"
-                description="www.instagram.com"
+                title={item[1]}
+                description={item[2]}
               />
             </Card>
           </Col>
@@ -112,6 +134,8 @@ const Explore = (props) => {
         changeArtInfoModalVisible={changeArtInfoModalVisible}
         selectedArt={selectedArt}
         changeSelectedArt={changeSelectedArt}
+        selectedIndex={selectedIndex}
+        changeSelectedIndex={changeSelectedIndex}
       />
     </div>
   );

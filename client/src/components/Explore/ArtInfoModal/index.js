@@ -3,14 +3,14 @@ import { Modal, Button, Spin, Row, Col, Statistic, Timeline } from 'antd';
 import styles from './ArtInfoModal.module.scss';
 
 const ArtInfoModal = (props) => {
-  const { artInfoModalVisible, changeArtInfoModalVisible } = props;
+  const { artInfoModalVisible, changeArtInfoModalVisible, selectedArt, selectedIndex } = props;
   const [loading, changeLoading] = useState(false);
   const handleClose = () => {
     changeArtInfoModalVisible(false);
   };
   return (
     <Modal
-      title="Basic Modal"
+      title={selectedArt ? selectedArt[1] : ''}
       visible={artInfoModalVisible}
       footer={[
         <Button key="Close" type="primary" onClick={handleClose}>
@@ -27,7 +27,7 @@ const ArtInfoModal = (props) => {
               <div
                 className={styles.image}
                 style={{
-                  backgroundImage: `url("https://loremflickr.com/320/240/art?lock=1")`
+                  backgroundImage: `url("https://loremflickr.com/320/240/art?lock=${selectedIndex}")`
                 }}
               />
             </Col>
@@ -35,15 +35,15 @@ const ArtInfoModal = (props) => {
               <div className={styles.infoWrapper}>
                 <div className={styles.infoItem}>
                   <div style={{ width: 80 }}>Name:</div>
-                  <div>Test1</div>
+                  <div>{selectedArt ? selectedArt[1] : ''}</div>
                 </div>
                 <div className={styles.infoItem}>
                   <div style={{ width: 80 }}>Author:</div>
-                  <div>Test1</div>
+                  <div>{selectedArt ? selectedArt[2] : ''}</div>
                 </div>
                 <div className={styles.infoItem}>
                   <div style={{ width: 80 }}>Owner:</div>
-                  <div>Test1</div>
+                  <div>{selectedArt ? selectedArt[2] : ''}</div>
                 </div>
                 <div className={styles.data}>
                   <Statistic
